@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wawancara Penelitian Geoportal IGT-PR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E3445; --ink-2:#2C4A5E; --paper:#F5F8F7; --surface:#FFFFFF;
+    --land:#3F7355; --parcel:#B8862B; --line:#D5DEDF; --muted:#5A6A74; --err:#A33A2B;
+    --font:"Plus Jakarta Sans", "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--font)}
+  header{position:relative;background:var(--ink);color:#fff;overflow:hidden}
+  header svg{position:absolute;inset:0;width:100%;height:100%}
+  .head-in{position:relative;max-width:1040px;margin:0 auto;padding:40px 24px 36px}
+  header h1{margin:0 0 8px;font-size:clamp(1.5rem,3.2vw,2.1rem);line-height:1.2;font-weight:700;max-width:24ch}
+  header p{margin:0;color:#C9D6DC;font-size:.95rem;max-width:62ch}
+  .wrap{max-width:1040px;margin:0 auto;padding:28px 24px 64px;display:grid;grid-template-columns:220px 1fr;gap:40px}
+  nav ol{list-style:none;margin:0;padding:0;position:sticky;top:20px}
+  nav li{display:flex;gap:12px;align-items:center;padding:8px 0;color:var(--muted);font-size:.92rem}
+  nav li .n{flex:0 0 26px;height:26px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;font-size:.78rem;font-weight:600;background:var(--surface)}
+  nav li.done .n{background:var(--land);border-color:var(--land);color:#fff}
+  nav li.now{color:var(--ink);font-weight:600}
+  nav li.now .n{border-color:var(--parcel);color:var(--parcel);box-shadow:0 0 0 3px rgba(184,134,43,.18)}
+  .mprog{display:none;font-size:.9rem;color:var(--muted);margin-bottom:12px}
+  main{max-width:720px;min-width:0}
+  h2{margin:0 0 4px;font-size:1.45rem;line-height:1.3}
+  .lead{margin:0 0 24px;color:var(--muted)}
+  .q{border-top:1px solid var(--line);padding:22px 0}
+  .q:last-of-type{border-bottom:1px solid var(--line)}
+  .q label{display:block;font-weight:500;margin-bottom:10px}
+  .q .code{color:var(--land);font-weight:700;margin-right:6px}
+  .field{margin-bottom:18px}
+  .field label{display:block;font-weight:600;font-size:.92rem;margin-bottom:6px}
+  .field small{color:var(--muted);font-weight:400}
+  input[type=text],textarea{width:100%;font:inherit;color:inherit;background:var(--surface);border:1.5px solid var(--line);border-radius:6px;padding:10px 12px}
+  textarea{min-height:120px;resize:vertical;line-height:1.55}
+  input:focus,textarea:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 3px rgba(44,74,94,.15)}
+  .cats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+  .cat{position:relative}
+  .cat input{position:absolute;opacity:0}
+  .cat span{display:block;padding:12px 14px;border:1.5px solid var(--line);border-radius:6px;background:var(--surface);cursor:pointer;font-weight:500}
+  .cat input:checked+span{border-color:var(--land);background:#EEF5F0;color:var(--land)}
+  .cat input:focus-visible+span{box-shadow:0 0 0 3px rgba(63,115,85,.25)}
+  .info{background:var(--surface);border-left:3px solid var(--land);padding:16px 18px;margin-bottom:20px;font-size:.95rem}
+  .info p{margin:0 0 8px}.info p:last-child{margin:0}
+  .consent{display:flex;gap:12px;align-items:flex-start;padding:14px 0;cursor:pointer}
+  .consent input{margin-top:5px;width:18px;height:18px;accent-color:var(--land)}
+  .actions{display:flex;justify-content:space-between;gap:12px;margin-top:28px}
+  button{font:inherit;font-weight:600;border-radius:6px;padding:11px 22px;cursor:pointer;border:1.5px solid var(--ink)}
+  .primary{background:var(--ink);color:#fff}
+  .primary:hover{background:var(--ink-2)}
+  .ghost{background:transparent;color:var(--ink)}
+  button:focus-visible{outline:3px solid var(--parcel);outline-offset:2px}
+  button:disabled{opacity:.55;cursor:wait}
+  .err{color:var(--err);font-size:.92rem;margin-top:14px;min-height:1.2em}
+  .sum{width:100%;border-collapse:collapse;font-size:.95rem;margin-bottom:8px}
+  .sum td{padding:9px 0;border-bottom:1px solid var(--line)}
+  .sum td:last-child{text-align:right;font-weight:600}
+  .done-id{font-size:2rem;font-weight:700;color:var(--land);margin:8px 0 16px}
+  .loading{color:var(--muted)}
+  @media (max-width:760px){
+    .wrap{grid-template-columns:1fr;gap:0;padding-top:20px}
+    nav{display:none}.mprog{display:block}
+    .cats{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:no-preference){ header .contour{animation:drift 1.6s ease-out both} }
+  @keyframes drift{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .q .dim{display:block;font-size:.85rem;color:var(--muted);margin-bottom:4px}
+  .q .probe{font-size:.88rem;color:var(--muted);margin:-4px 0 10px;padding-left:12px;border-left:2px solid var(--line)}
+  .cat small{display:block;font-weight:400;font-size:.85rem;color:var(--muted);margin-top:4px}
+  select{width:100%;font:inherit;color:inherit;background:var(--surface);border:1.5px solid var(--line);border-radius:6px;padding:10px 12px}
+  select:focus{outline:none;border-color:var(--ink-2);box-shadow:0 0 0 3px rgba(44,74,94,.15)}
+  .who{background:var(--surface);border:1.5px solid var(--line);border-radius:6px;padding:14px 16px;margin:-6px 0 18px;font-size:.95rem}
+  .who div{display:grid;grid-template-columns:110px 1fr;gap:8px;padding:3px 0}
+  .who span{color:var(--muted)}
+  .note{background:#EEF5F0;border-left:3px solid var(--land);padding:12px 14px;margin-bottom:8px;font-size:.93rem}
+  .mic-row{display:flex;align-items:center;gap:12px;margin-top:8px;flex-wrap:wrap}
+  .mic{display:inline-flex;align-items:center;gap:8px;font-size:.88rem;padding:7px 14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+  .mic svg{width:16px;height:16px}
+  .mic.on{border-color:var(--err);color:var(--err);background:#FBEFEC}
+  .mic.on svg{animation:pulse 1s ease-in-out infinite}
+  .live{font-size:.88rem;color:var(--muted);font-style:italic}
+  @keyframes pulse{50%{opacity:.35}}
+</style>
+</head>
+<body>
+<header>
+  <svg class="contour" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="#3E6378" stroke-width="1.2" opacity=".75">
+      <path d="M760 220c20-60 90-90 160-80s130 50 190 20 90-90 90-160"/>
+      <path d="M800 220c20-45 75-65 130-58s110 38 160 15 70-70 110-150"/>
+      <path d="M840 220c15-30 55-45 95-40s90 28 130 10 60-55 135-160"/>
+      <path d="M880 220c10-18 35-28 65-25s70 20 100 6 50-40 155-170"/>
+      <path d="M700 220c30-80 110-120 200-110s150 60 220 30 80-120 80-180"/>
+      <path d="M640 220c35-100 130-150 240-140s170 70 250 35 70-140 70-190"/>
+      <ellipse cx="1010" cy="120" rx="34" ry="18"/>
+    </g>
+  </svg>
+  <div class="head-in">
+    <h1 id="h-title">Wawancara Penelitian Geoportal IGT-PR</h1>
+    <p id="h-sub">Memuat…</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav aria-label="Langkah pengisian"><ol id="rail"></ol></nav>
+  <main>
+    <div class="mprog" id="mprog"></div>
+    <div id="panel"><p class="loading">Memuat formulir…</p></div>
+  </main>
+</div>
+
+<script>
+// ====== ISI DENGAN URL WEB APP GAS (Deploy > Manage deployments > URL berakhiran /exec) ======
+const API_URL = 'https://script.google.com/macros/s/AKfycbwtZZ1ttVxnUlRk9jQYqFe65IBh3PbaoeUNEptfJIbXJqDNTCKCw355mI0UeQ2ZblUr/exec';
+
+// Pengganti google.script.run: memanggil GAS lewat doPost
+const google = { script: { get run(){
+  let ok = () => {}, ko = () => {};
+  const p = new Proxy({}, { get(_, name){
+    if (name === 'withSuccessHandler') return f => { ok = f; return p; };
+    if (name === 'withFailureHandler') return f => { ko = f; return p; };
+    return (...args) => fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ fn: name, args }) })
+      .then(r => r.json())
+      .then(d => { if (!d.ok) throw new Error(d.error); return d.result; })
+      .then(ok, err => ko(err instanceof Error ? err : new Error(String(err))));
+  }});
+  return p;
+}}};
+</script>
+<script>
+const DRAFT_KEY = 'wawancara-igtpr-draft-v3';
+const PER_PAGE = 4;
+let CFG = null;
+let pin = '';        // tidak disimpan ke perangkat
+let terakhir = '';   // waktu pengiriman terakhir (dari server)
+let st = { step: 0, persetujuan: false, kode: '', jawaban: {}, jawabanKode: '' };
+
+const $ = s => document.querySelector(s);
+
+// ---------- Jawab dengan suara (Web Speech API) ----------
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+let rec = null, recEl = null;
+
+function stopMic(){ if (rec){ try{ rec.stop(); }catch(e){} } }
+
+function toggleMic(ta, btn, live){
+  if (rec && recEl === ta) return stopMic();
+  stopMic();
+  const r = new SR();
+  r.lang = 'id-ID'; r.continuous = true; r.interimResults = true;
+  let gagal = false;
+  r.onstart = () => { btn.classList.add('on'); btn.setAttribute('aria-pressed', 'true'); btn.innerHTML = MIC_SVG + 'Berhenti merekam'; live.textContent = 'Silakan bicara…'; };
+  r.onresult = e => {
+    let sementara = '';
+    for (let i = e.resultIndex; i < e.results.length; i++){
+      const t = e.results[i][0].transcript.trim();
+      if (e.results[i].isFinal){
+        ta.value += (ta.value && !/\s$/.test(ta.value) ? ' ' : '') + t;
+        ta.dispatchEvent(new Event('input'));
+      } else sementara += t + ' ';
+    }
+    live.textContent = sementara || 'Mendengarkan…';
+  };
+  r.onerror = e => {
+    gagal = true;
+    live.textContent = (e.error === 'not-allowed' || e.error === 'service-not-allowed')
+      ? 'Akses mikrofon ditolak. Izinkan mikrofon di browser, atau gunakan tombol mikrofon pada keyboard HP.'
+      : e.error === 'no-speech' ? 'Suara tidak terdeteksi. Coba lagi.'
+      : e.error === 'network' ? 'Koneksi internet diperlukan untuk mengubah suara menjadi teks.'
+      : 'Perekaman gagal (' + e.error + ').';
+  };
+  r.onend = () => {
+    btn.classList.remove('on'); btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = MIC_SVG + 'Jawab dengan suara';
+    if (!gagal) live.textContent = '';
+    if (rec === r){ rec = null; recEl = null; }
+  };
+  rec = r; recEl = ta;
+  try { r.start(); } catch(e){ live.textContent = 'Perekaman tidak dapat dimulai.'; }
+}
+
+function pasangMic(){
+  const tas = document.querySelectorAll('textarea[data-q]');
+  if (!tas.length) return;
+  if (!SR){
+    const n = document.createElement('p');
+    n.className = 'probe';
+    n.textContent = 'Browser ini belum mendukung jawaban suara. Gunakan Google Chrome, atau tombol mikrofon pada keyboard HP.';
+    tas[0].closest('.q').before(n);
+    return;
+  }
+  tas.forEach(ta => {
+    const row = document.createElement('div'); row.className = 'mic-row';
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'mic';
+    btn.setAttribute('aria-pressed', 'false'); btn.innerHTML = MIC_SVG + 'Jawab dengan suara';
+    const live = document.createElement('span'); live.className = 'live'; live.setAttribute('aria-live', 'polite');
+    btn.onclick = () => toggleMic(ta, btn, live);
+    row.append(btn, live); ta.after(row);
+  });
+}
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function loadDraft(){ try{ const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d) st = Object.assign(st, d); }catch(e){} }
+function saveDraft(){ try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(st)); }catch(e){} }
+function clearDraft(){ try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+
+const inf = () => CFG.informan.find(x => x.kode === st.kode);
+const qsAll = () => inf() ? CFG.pertanyaan[inf().kategori] : [];
+const saranKode = () => inf() ? inf().kategori + '.SARAN' : '';
+
+function steps(){
+  const s = [{ id: 'intro', label: 'Pengantar' }, { id: 'identitas', label: 'Identitas informan' }];
+  const qs = qsAll();
+  for (let i = 0; i < qs.length; i += PER_PAGE){
+    const part = qs.slice(i, i + PER_PAGE);
+    s.push({ id: 'q:' + i, label: 'Pertanyaan ' + part[0].no + '–' + part[part.length - 1].no, qs: part });
+  }
+  s.push({ id: 'tinjau', label: 'Tinjau dan kirim' });
+  return s;
+}
+
+function renderRail(list){
+  $('#rail').innerHTML = list.map((s, i) =>
+    `<li class="${i < st.step ? 'done' : i === st.step ? 'now' : ''}" ${i === st.step ? 'aria-current="step"' : ''}>
+       <span class="n">${i < st.step ? '✓' : i + 1}</span>${esc(s.label)}</li>`).join('');
+  $('#mprog').textContent = `Langkah ${st.step + 1} dari ${list.length}: ${list[st.step].label}`;
+}
+
+function nav(nextLabel){
+  return `<div class="err" id="err" role="alert"></div>
+  <div class="actions">
+    ${st.step > 0 ? '<button class="ghost" data-act="back">Kembali</button>' : '<span></span>'}
+    <button class="primary" data-act="next" id="btn-next">${nextLabel || 'Lanjut'}</button>
+  </div>`;
+}
+
+function whoCard(i){
+  if (!i) return '';
+  return `<div class="who">
+    <div><span>Jabatan</span>${esc(i.jabatan || '-')}</div>
+    <div><span>Unit kerja</span>${esc(i.unit || '-')}</div>
+    <div><span>Kategori</span>${esc(CFG.kategori[i.kategori].nama)}</div></div>
+    ${i.pakaiPin ? `<div class="field"><label for="f-pin">PIN <small>(diberikan oleh peneliti)</small></label>
+      <input type="text" id="f-pin" inputmode="numeric" autocomplete="off" value="${esc(pin)}"></div>` : ''}`;
+}
+
+function render(){
+  stopMic();
+  const list = steps();
+  if (st.step >= list.length) st.step = list.length - 1;
+  renderRail(list);
+  const cur = list[st.step];
+  let h = '';
+
+  if (cur.id === 'intro'){
+    const p = CFG.penelitian;
+    h = `<h2>Pengantar</h2>
+    <p class="lead">Terima kasih atas kesediaan Bapak/Ibu menjadi informan.</p>
+    <div class="info">
+      <p><strong>Judul penelitian:</strong> ${esc(p.judul)}</p>
+      <p><strong>Peneliti:</strong> ${esc(p.peneliti)}, ${esc(p.program)}</p>
+      <p>Wawancara ini menggali pengalaman dan pandangan Bapak/Ibu tentang implementasi Geoportal IGT-PR. Tidak ada jawaban benar atau salah. Di bawah setiap pertanyaan ada poin yang dapat Bapak/Ibu ceritakan; jawablah seluas yang Bapak/Ibu ketahui.</p>
+      <p>Identitas Bapak/Ibu dijaga kerahasiaannya dan dalam laporan hanya disebut dengan kode informan. Jawaban yang sudah dikirim masih dapat diubah dengan membuka form ini lagi.</p>
+    </div>
+    <label class="consent"><input type="checkbox" id="consent" ${st.persetujuan ? 'checked' : ''}>
+      <span>Saya bersedia menjadi informan dan jawaban saya digunakan untuk keperluan penelitian ini.</span></label>
+    ${nav('Mulai')}`;
+  }
+
+  else if (cur.id === 'identitas'){
+    const groups = Object.keys(CFG.kategori).map(k => {
+      const items = CFG.informan.filter(x => x.kategori === k);
+      if (!items.length) return '';
+      return `<optgroup label="${esc(CFG.kategori[k].nama)}">${items.map(x =>
+        `<option value="${esc(x.kode)}" ${x.kode === st.kode ? 'selected' : ''}>${esc(x.nama)}${x.sudah ? ' (sudah mengisi)' : ''}</option>`).join('')}</optgroup>`;
+    }).join('');
+    h = `<h2>Identitas informan</h2>
+    <p class="lead">Pilih nama Bapak/Ibu dari daftar.</p>
+    ${CFG.informan.length ? `<div class="field"><label for="f-inf">Nama informan</label>
+      <select id="f-inf"><option value="">Pilih nama…</option>${groups}</select></div>
+      <div id="who">${whoCard(inf())}</div>`
+      : '<p class="err">Daftar informan masih kosong. Hubungi peneliti.</p>'}
+    ${nav()}`;
+  }
+
+  else if (cur.id.startsWith('q:')){
+    h = `${terakhir && cur.id === 'q:0' ? `<div class="note">Bapak/Ibu sudah mengirim jawaban pada ${esc(terakhir)}. Jawaban sebelumnya sudah dimuat dan dapat diubah.</div>` : ''}
+    <h2>${esc(cur.label)}</h2><p class="lead">${esc(inf().nama)}, ${esc(CFG.kategori[inf().kategori].nama)}</p>
+    ${cur.qs.map(q => `<div class="q">
+      <span class="dim">${esc(q.dimensi)}</span>
+      <label for="q-${q.kode}"><span class="code">${q.no}.</span>${esc(q.teks)}</label>
+      <p class="probe">Dapat mencakup: ${esc(q.probing)}</p>
+      <textarea id="q-${q.kode}" data-q="${q.kode}">${esc(st.jawaban[q.kode] || '')}</textarea></div>`).join('')}
+    ${nav()}`;
+  }
+
+  else if (cur.id === 'tinjau'){
+    const qs = qsAll();
+    const n = qs.filter(q => (st.jawaban[q.kode] || '').trim()).length;
+    h = `<h2>Tinjau dan kirim</h2>
+    <table class="sum">
+      <tr><td>Nama</td><td>${esc(inf().nama)}</td></tr>
+      <tr><td>Kategori</td><td>${esc(CFG.kategori[inf().kategori].nama)}</td></tr>
+      <tr><td>Pertanyaan dijawab</td><td>${n} dari ${qs.length}</td></tr>
+    </table>
+    <div class="q">
+      <label for="q-saran">Masukan/saran <small style="color:var(--muted);font-weight:400">(opsional)</small></label>
+      <p class="probe">Masukan untuk penelitian ini atau untuk pengembangan Geoportal IGT-PR.</p>
+      <textarea id="q-saran" data-q="${saranKode()}">${esc(st.jawaban[saranKode()] || '')}</textarea>
+    </div>
+    <p class="lead">${terakhir ? 'Jawaban baru akan menggantikan jawaban sebelumnya. Versi lama tetap tercatat di riwayat.' : 'Setelah dikirim, jawaban masih dapat diubah dengan membuka form ini lagi.'}</p>
+    ${nav(terakhir ? 'Simpan perubahan' : 'Kirim jawaban')}`;
+  }
+
+  $('#panel').innerHTML = h;
+  bind(cur);
+  pasangMic();
+  window.scrollTo(0, 0);
+}
+
+function bind(cur){
+  const c = $('#consent'); if (c) c.onchange = e => { st.persetujuan = e.target.checked; saveDraft(); };
+  const sel = $('#f-inf');
+  if (sel) sel.onchange = e => { st.kode = e.target.value; pin = ''; terakhir = ''; saveDraft(); $('#who').innerHTML = whoCard(inf()); bindPin(); renderRail(steps()); };
+  bindPin();
+  document.querySelectorAll('[data-q]').forEach(el => el.oninput = e => { st.jawaban[el.dataset.q] = e.target.value; st.jawabanKode = st.kode; saveDraft(); });
+  document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => b.dataset.act === 'back' ? go(-1) : next(cur));
+}
+function bindPin(){ const p = $('#f-pin'); if (p) p.oninput = e => pin = e.target.value; }
+
+function fail(msg){ const e = $('#err'); if (e) e.textContent = msg; }
+
+function next(cur){
+  if (cur.id === 'intro' && !st.persetujuan) return fail('Centang persetujuan untuk melanjutkan.');
+  if (cur.id === 'identitas'){
+    if (!inf()) return fail('Pilih nama informan.');
+    if (inf().pakaiPin && !pin.trim()) return fail('Masukkan PIN.');
+    const btn = $('#btn-next'); btn.disabled = true; btn.textContent = 'Memuat…';
+    google.script.run
+      .withSuccessHandler(res => {
+        terakhir = res.terakhir;
+        const adaDraft = st.jawabanKode === st.kode && Object.values(st.jawaban).some(v => String(v).trim());
+        if (!adaDraft){ st.jawaban = res.jawaban || {}; st.jawabanKode = st.kode; }
+        go(1);
+      })
+      .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Lanjut'; fail(err.message); })
+      .loadResponse(st.kode, pin);
+    return;
+  }
+  if (cur.id.startsWith('q:')){
+    const empty = cur.qs.filter(q => !(st.jawaban[q.kode] || '').trim());
+    if (empty.length){ fail('Jawab pertanyaan nomor ' + empty.map(q => q.no).join(', ') + '. Tulis "tidak tahu" bila tidak ada jawaban.'); document.getElementById('q-' + empty[0].kode).focus(); return; }
+  }
+  if (cur.id === 'tinjau') return submit();
+  go(1);
+}
+
+function go(d){ st.step += d; saveDraft(); render(); }
+
+function submit(){
+  stopMic();
+  const btn = $('#btn-next'); const label = btn.textContent; btn.disabled = true; btn.textContent = 'Mengirim…';
+  const jawaban = {};
+  qsAll().forEach(q => jawaban[q.kode] = st.jawaban[q.kode] || '');
+  jawaban[saranKode()] = st.jawaban[saranKode()] || '';
+  google.script.run
+    .withSuccessHandler(res => {
+      clearDraft();
+      const i = inf(); if (i) i.sudah = true;
+      $('#rail').innerHTML = ''; $('#mprog').textContent = '';
+      $('#panel').innerHTML = `<h2>${res.versi > 1 ? 'Perubahan tersimpan' : 'Jawaban terkirim'}</h2>
+        <p class="lead">Terima kasih atas waktu dan informasi yang Bapak/Ibu berikan.</p>
+        <p>Kode informan Bapak/Ibu:</p><div class="done-id">${esc(res.kode)}</div>
+        <p class="lead">Untuk mengubah jawaban, buka kembali form ini dan pilih nama Bapak/Ibu.</p>`;
+    })
+    .withFailureHandler(err => { btn.disabled = false; btn.textContent = label; fail('Gagal mengirim: ' + err.message); })
+    .submitResponse({ persetujuan: st.persetujuan, kode: st.kode, pin: pin, jawaban });
+}
+
+google.script.run
+  .withSuccessHandler(cfg => {
+    CFG = cfg;
+    $('#h-sub').textContent = cfg.penelitian.judul;
+    loadDraft();
+    if (!inf()) { st.kode = ''; if (st.step > 1) st.step = 1; }
+    else if (st.step > 1) st.step = 1; // muat ulang: minta konfirmasi nama/PIN dulu
+    render();
+  })
+  .withFailureHandler(err => { $('#panel').innerHTML = `<p class="err">Formulir gagal dimuat: ${esc(err.message)}. Muat ulang halaman.</p>`; })
+  .getConfig();
+</script>
+</body>
+</html>
