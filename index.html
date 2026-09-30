@@ -119,17 +119,38 @@
 // ====== ISI DENGAN URL WEB APP GAS (Deploy > Manage deployments > URL berakhiran /exec) ======
 const API_URL = 'https://script.google.com/macros/s/AKfycbwtZZ1ttVxnUlRk9jQYqFe65IBh3PbaoeUNEptfJIbXJqDNTCKCw355mI0UeQ2ZblUr/exec';
 
-// Pengganti google.script.run: memanggil GAS lewat doPost
+// Pengganti google.script.run: memanggil GAS lewat doPost.
+// Fungsi baca dicoba ulang otomatis bila koneksi ke GAS gagal sesaat.
+const RETRY = { getConfig: 3, loadResponse: 3, submitResponse: 0 };
+const tunggu = ms => new Promise(r => setTimeout(r, ms));
+
+async function panggilGAS(fn, args){
+  const maks = RETRY[fn] || 0;
+  for (let i = 0; ; i++){
+    try {
+      const r = await fetch(API_URL, { method: 'POST', redirect: 'follow', cache: 'no-store',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ fn, args }) });
+      const teks = await r.text();
+      let d;
+      try { d = JSON.parse(teks); } catch(e){ throw new Error('Server GAS mengembalikan respons tidak valid (cek deployment).'); }
+      if (!d.ok) { const err = new Error(d.error); err.dariServer = true; throw err; }
+      return d.result;
+    } catch(err){
+      if (err.dariServer || i >= maks) {
+        if (err.message === 'Failed to fetch') err.message = 'Tidak dapat terhubung ke server. Periksa internet lalu coba lagi';
+        throw err;
+      }
+      await tunggu(1000 * (i + 1));
+    }
+  }
+}
+
 const google = { script: { get run(){
   let ok = () => {}, ko = () => {};
   const p = new Proxy({}, { get(_, name){
     if (name === 'withSuccessHandler') return f => { ok = f; return p; };
     if (name === 'withFailureHandler') return f => { ko = f; return p; };
-    return (...args) => fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify({ fn: name, args }) })
-      .then(r => r.json())
-      .then(d => { if (!d.ok) throw new Error(d.error); return d.result; })
-      .then(ok, err => ko(err instanceof Error ? err : new Error(String(err))));
+    return (...args) => panggilGAS(name, args).then(ok, err => ko(err instanceof Error ? err : new Error(String(err))));
   }});
   return p;
 }}};
